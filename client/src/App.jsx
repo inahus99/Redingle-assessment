@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
-
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 function App() {
   const [query, setQuery] = useState('');
   const [pokemons, setPokemons] = useState([]);
@@ -14,7 +14,7 @@ function App() {
   const fetchPokemon = async (searchQuery = '') => {
     setLoading(true);
     try {
-      const { data } = await axios.get(`http://localhost:5000/api/search?q=${searchQuery}`);
+      const { data } = await axios.get(`${API_BASE_URL}/api/search?q=${searchQuery}`);
       setPokemons(data);
     } catch (error) {
       console.error("Error fetching data:", error);
