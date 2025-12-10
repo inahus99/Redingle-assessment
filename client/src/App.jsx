@@ -1,20 +1,29 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+// Normalize API base URL (handle missing protocol in env)
+let API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+if (API_BASE_URL && !/^https?:\/\//i.test(API_BASE_URL)) {
+  API_BASE_URL = "https://" + API_BASE_URL;
+}
+console.log('API_BASE_URL =', API_BASE_URL);
+
 function App() {
   const [query, setQuery] = useState('');
   const [pokemons, setPokemons] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchPokemon();
+    fetchPokemon('');
   }, []);
 
   const fetchPokemon = async (searchQuery = '') => {
     setLoading(true);
     try {
-      const { data } = await axios.get(`${API_BASE_URL}/api/search?q=${searchQuery}`);
+      // always encode query to handle ":" and spaces safely
+      const encoded = encodeURIComponent(searchQuery);
+      const { data } = await axios.get(`${API_BASE_URL}/api/search?q=${encoded}`);
       setPokemons(data);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -56,17 +65,15 @@ function App() {
             </div>
 
             <p style={{fontSize: '0.9rem', color: '#ccc'}}>
-           
-              {p.description.split('.')[0]}.
+              {p.description?.split('.')[0]}.
             </p>
 
             <div className="stats">
-              <span>⚔️ {p.stats.attack}</span>
-              <span>🛡️ {p.stats.defense}</span>
-              <span>⚡ {p.stats.speed}</span>
+              <span>⚔️ {p.stats?.attack}</span>
+              <span>🛡️ {p.stats?.defense}</span>
+              <span>⚡ {p.stats?.speed}</span>
             </div>
             
-            {/* Semantic Search Score Display  */}
             {p.score && (
                <div className="score">Match: {(p.score * 100).toFixed(1)}%</div>
             )}
